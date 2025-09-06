@@ -217,7 +217,7 @@ See the [LICENSE](https://creativecommons.org/licenses/by-nc-nd/4.0/) for detail
 
 ## 📞 Contact
 
-**Amaresh** - [@devAmaresh](https://github.com/devAmaresh)
+**Jitendra** - [@Jitendra](https://github.com/Jitendra2407)
 
 Project Link: [https://github.com/Jitendra2407/Scribble](https://github.com/Jitendra2407/Scribble)
 
