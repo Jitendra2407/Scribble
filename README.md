@@ -1,4 +1,4 @@
-# MystiDraw ✨🎨
+# Scribble ✨🎨
 
 <div align="center">
   <img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
@@ -84,8 +84,8 @@
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/devAmaresh/mystidraw.git
-   cd mystidraw
+   git clone https://github.com/Jitendra2407/scribble.git
+   cd scribble
    ```
 
 2. **Install backend dependencies**
@@ -109,7 +109,7 @@
    ```env
    PORT=3000
    JWT_SECRET=your_super_secret_jwt_key_here
-   MONGODB_URI=mongodb://localhost:27017/mystidraw
+   MONGODB_URI=mongodb://localhost:27017/scribble
    FRONTEND_URL=http://localhost:5173
    NODE_ENV=development
    ```
@@ -137,7 +137,7 @@
 ## 📁 Project Structure
 
 ```
-mystidraw/
+scribble/
 ├── backend/
 │   ├── controllers/     # Route controllers
 │   ├── handlers/        # Socket event handlers
@@ -219,14 +219,14 @@ See the [LICENSE](https://creativecommons.org/licenses/by-nc-nd/4.0/) for detail
 
 **Amaresh** - [@devAmaresh](https://github.com/devAmaresh)
 
-Project Link: [https://github.com/devAmaresh/mystidraw](https://github.com/devAmaresh/mystidraw)
+Project Link: [https://github.com/Jitendra2407/Scribble](https://github.com/Jitendra2407/Scribble)
 
 Live Demo: [https://doodle-dash-kappa.vercel.app/](https://doodle-dash-kappa.vercel.app/)
 
 ---
 
 <div align="center">
-  <p>Made with ❤️ by <a href="https://github.com/devAmaresh">devAmaresh</a></p>
-  <p>🎮 <a href="https://doodle-dash-kappa.vercel.app/" target="_blank"><strong>Play MystiDraw Now!</strong></a></p>
+  <p>Made with ❤️ by <a href="https://github.com/Jitendra2407/Scribble">Jitendra2407</a></p>
+  <p>🎮 <a href="https://doodle-dash-kappa.vercel.app/" target="_blank"><strong>Play Scribble Now!</strong></a></p>
   <p>⭐ Star this repo if you like it!</p>
 </div>
