@@ -221,12 +221,12 @@ See the [LICENSE](https://creativecommons.org/licenses/by-nc-nd/4.0/) for detail
 
 Project Link: [https://github.com/Jitendra2407/Scribble](https://github.com/Jitendra2407/Scribble)
 
-Live Demo: [https://doodle-dash-kappa.vercel.app/](https://doodle-dash-kappa.vercel.app/)
+Live Demo: [https://scribble-rq52.vercel.app/](https://scribble-rq52.vercel.app/)
 
 ---
 
 <div align="center">
   <p>Made with ❤️ by <a href="https://github.com/Jitendra2407/Scribble">Jitendra2407</a></p>
-  <p>🎮 <a href="https://doodle-dash-kappa.vercel.app/" target="_blank"><strong>Play Scribble Now!</strong></a></p>
+  <p>🎮 <a href="https://scribble-rq52.vercel.app/" target="_blank"><strong>Play Scribble Now!</strong></a></p>
   <p>⭐ Star this repo if you like it!</p>
 </div>
