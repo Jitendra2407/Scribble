@@ -96,7 +96,9 @@ const Navbar = ({ socket }: NavbarProps) => {
             <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
               <LuSparkles className="w-5 h-5" />
             </div>
-            <span className="font-bold text-lg hidden sm:block">Scribble</span>
+            <span className="font-bold text-lg hidden sm:block">
+              Piktionary
+            </span>
           </div>
 
           <div className="flex items-center space-x-2 bg-white/10 px-3 py-1.5 rounded-lg">
@@ -114,9 +116,7 @@ const Navbar = ({ socket }: NavbarProps) => {
 
           <Button
             type="text"
-            icon={
-              copied ? <LuCopy className="text-green-400" /> : <LuCopy />
-            }
+            icon={copied ? <LuCopy className="text-green-400" /> : <LuCopy />}
             onClick={copyInviteLink}
             className="text-white hover:bg-white/10 border-white/20"
             size="small"

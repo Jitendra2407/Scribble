@@ -9,6 +9,21 @@ export default function setupSocketHandlers(io) {
   io.on("connection", (socket) => {
     const { decoded } = socket;
     console.log(`Socket connected: ${socket.id} for user: ${decoded.username}`);
+
+    // WebRTC Signaling Handlers
+    socket.on("webrtc-offer", ({ to, offer }) => {
+      socket.to(to).emit("webrtc-offer", { from: socket.id, offer });
+    });
+
+    socket.on("webrtc-answer", ({ to, answer }) => {
+      socket.to(to).emit("webrtc-answer", { from: socket.id, answer });
+    });
+
+    socket.on("webrtc-ice-candidate", ({ to, candidate }) => {
+      socket
+        .to(to)
+        .emit("webrtc-ice-candidate", { from: socket.id, candidate });
+    });
     
     // Join Room Handler
     socket.on("joinRoom", (roomId, username) => {
@@ -381,6 +396,15 @@ export default function setupSocketHandlers(io) {
         });
         
         if (disconnectedPlayer) {
+          io.to(roomId).emit("leaveMessage", {
+            message: `${disconnectedPlayer.username} has disconnected.`,
+          });
+        }
+
+        if (disconnectedPlayer) {
+          // Add this line to notify clients a user has left the video call
+          io.to(roomId).emit("user-left", socket.id);
+
           io.to(roomId).emit("leaveMessage", {
             message: `${disconnectedPlayer.username} has disconnected.`,
           });

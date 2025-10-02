@@ -128,13 +128,18 @@ const Page = () => {
       <div className="relative z-10 min-h-screen flex flex-col">
         {/* Header */}
         <div className="text-center pt-8 pb-4 px-4">
-         
           <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-            Scribble & Guess
+            Piktionary
           </h1>
+          <p
+            className="text-sm md:text-base max-w-md mx-auto 
+  bg-gradient-to-r from-green-400 via-emerald-500 to-teal-600 
+  bg-clip-text text-transparent"
+          >
+            A fun multiplayer drawing and guessing game. Join or create a room
+            to start playing!
+          </p>
         </div>
-
-        
 
         {/* Main Game Card */}
         <div className="flex-1 flex items-center justify-center px-4 pb-8">
@@ -203,7 +208,9 @@ const Page = () => {
                         type="text"
                         placeholder="Room ID (e.g., ROOM123)"
                         value={joinRoomId}
-                        onChange={(e) => setJoinRoomId(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setJoinRoomId(e.target.value.toUpperCase())
+                        }
                         className="w-full px-4 py-3 bg-white border border-pink-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300 text-gray-800"
                         maxLength={10}
                       />
@@ -224,7 +231,8 @@ const Page = () => {
                       onClick={handleJoinRoom}
                       className="w-full mt-4 h-12 text-lg font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                       style={{
-                        background: "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)",
+                        background:
+                          "linear-gradient(135deg, #EC4899 0%, #F43F5E 100%)",
                       }}
                     >
                       Join the Fun! 🎨
@@ -246,7 +254,9 @@ const Page = () => {
                         type="text"
                         placeholder="Unique Room ID (e.g., MYROOM)"
                         value={roomId}
-                        onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                        onChange={(e) =>
+                          setRoomId(e.target.value.toUpperCase())
+                        }
                         className="w-full px-4 py-3 bg-white border border-cyan-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-300 text-gray-800"
                         maxLength={10}
                       />
@@ -267,7 +277,8 @@ const Page = () => {
                       onClick={handleCreateRoom}
                       className="w-full mt-4 h-12 text-lg font-semibold rounded-xl border-0 shadow-lg hover:shadow-xl transition-all duration-300"
                       style={{
-                        background: "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
+                        background:
+                          "linear-gradient(135deg, #06B6D4 0%, #3B82F6 100%)",
                       }}
                     >
                       Create Lobby 🚀
@@ -282,25 +293,33 @@ const Page = () => {
         {/* Game Instructions */}
         <div className="px-4 pb-8">
           <div className="max-w-2xl mx-auto bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-white/50">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">How to Play</h3>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              How to Play
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-2">
                   <LuMouse className="w-6 h-6 text-purple-600" />
                 </div>
-                <p className="text-sm text-gray-600">Draw the given word using your mouse or touch</p>
+                <p className="text-sm text-gray-600">
+                  Draw the given word using your mouse or touch
+                </p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mb-2">
                   <LuUsers className="w-6 h-6 text-pink-600" />
                 </div>
-                <p className="text-sm text-gray-600">Other players guess what you're drawing</p>
+                <p className="text-sm text-gray-600">
+                  Other players guess what you're drawing
+                </p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-2">
                   <LuTimer className="w-6 h-6 text-indigo-600" />
                 </div>
-                <p className="text-sm text-gray-600">Score points based on speed and accuracy</p>
+                <p className="text-sm text-gray-600">
+                  Score points based on speed and accuracy
+                </p>
               </div>
             </div>
           </div>

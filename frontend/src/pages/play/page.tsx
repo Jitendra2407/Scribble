@@ -9,6 +9,7 @@ import WordSelectModal from "../../components/play/modals/wordSelectModal";
 import RoundResultModal from "../../components/play/modals/roundResultModal";
 import GameEndModal from "../../components/play/modals/gameEndModal";
 import ChatSection from "../../components/play/chatSection";
+import VideoCall from "../../components/play/videoCall";
 import {
   LuEraser,
   LuPalette,
@@ -711,7 +712,7 @@ const Page = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50">
-      <Navbar socket={socket}/>
+      <Navbar socket={socket} />
 
       {/* Mobile Menu Button */}
       <div className="lg:hidden fixed top-20 right-4 z-50">
@@ -837,19 +838,19 @@ const Page = () => {
 
             {/* Drawing Tools - Desktop */}
             {isCurrentDrawer && (
-              <div className="hidden lg:flex flex-col w-16"> {/* Increased width from w-16 to w-20 */}
+              <div className="hidden lg:flex flex-col w-16">
+                {" "}
+                {/* Increased width from w-16 to w-20 */}
                 {/* Drawing Tools Card */}
-
-                  <DrawingTools
-                    currentColor={currentColor}
-                    currentStroke={currentStroke}
-                    isErasing={isErasing}
-                    handleColorChange={handleColorChange}
-                    handleStrokeChange={handleStrokeChange}
-                    toggleEraser={toggleEraser}
-                    clearCanvas={clearCanvas}
-                  />
-
+                <DrawingTools
+                  currentColor={currentColor}
+                  currentStroke={currentStroke}
+                  isErasing={isErasing}
+                  handleColorChange={handleColorChange}
+                  handleStrokeChange={handleStrokeChange}
+                  toggleEraser={toggleEraser}
+                  clearCanvas={clearCanvas}
+                />
               </div>
             )}
 
@@ -931,6 +932,9 @@ const Page = () => {
             toggleReady={toggleReady}
             canStart={canStart}
           />
+
+          {/* <VideoCall socket={socket} players={players} selfId={socket?.id}/> */}
+          <VideoCall socket={socket} players={players} selfId={socket?.id} />
 
           {/* Chat Section */}
           <ChatSection
