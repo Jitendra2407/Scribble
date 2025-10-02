@@ -10,6 +10,7 @@ import RoundResultModal from "../../components/play/modals/roundResultModal";
 import GameEndModal from "../../components/play/modals/gameEndModal";
 import ChatSection from "../../components/play/chatSection";
 import VideoCall from "../../components/play/videoCall";
+import { Player, GameState, ChatMessage, DrawData } from "../../types/types";
 import {
   LuEraser,
   LuPalette,
@@ -23,39 +24,31 @@ import { backend_url } from "../../utils/backend_url";
 import DrawingTools from "../../components/play/drawingtools";
 import { useVoiceFeedback } from "../../hooks/useVoiceFeedback";
 
-interface DrawData {
-  x: number;
-  y: number;
-  lastX: number | null;
-  lastY: number | null;
-  roomId: string;
-  color: string;
-  stroke: number;
-}
+// interface DrawData {
+//   x: number;
+//   y: number;
+//   lastX: number | null;
+//   lastY: number | null;
+//   roomId: string;
+//   color: string;
+//   stroke: number;
+// }
 
-interface ChatMessage {
-  message: string;
-  roomId: string;
-  username: string;
-}
+// interface ChatMessage {
+//   message: string;
+//   roomId: string;
+//   username: string;
+// }
 
-interface GameState {
-  state: "waiting" | "playing" | "ended";
-  round: number;
-  totalRounds: number;
-  players: any[];
-  scores: { [key: string]: number };
-  currentDrawer: string | null;
-  timeLeft: number;
-}
-
-interface Player {
-  userId: string;
-  username: string;
-  score: number;
-  isReady: boolean;
-  isConnected: boolean;
-}
+// interface GameState {
+//   state: "waiting" | "playing" | "ended";
+//   round: number;
+//   totalRounds: number;
+//   players: any[];
+//   scores: { [key: string]: number };
+//   currentDrawer: string | null;
+//   timeLeft: number;
+// }
 
 const Page = () => {
   const token = Cookies.get("token");
