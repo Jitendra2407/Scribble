@@ -44,6 +44,7 @@ interface VideoCallProps {
 }
 
 const VideoCall = ({ socket, players, selfId }: VideoCallProps) => {
+  console.log("Rendering VideoCall component");
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStreams, setRemoteStreams] = useState<
     Map<string, { stream: MediaStream; username: string }>
