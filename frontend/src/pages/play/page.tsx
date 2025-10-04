@@ -9,7 +9,7 @@ import WordSelectModal from "../../components/play/modals/wordSelectModal";
 import RoundResultModal from "../../components/play/modals/roundResultModal";
 import GameEndModal from "../../components/play/modals/gameEndModal";
 import ChatSection from "../../components/play/chatSection";
-import VideoCall from "../../components/play/videoCall";
+import VideoCall from "../../components/play/VideoCall";
 import { Player, GameState, ChatMessage, DrawData } from "../../types/types";
 import {
   LuEraser,
@@ -967,3 +967,8 @@ const Page = () => {
 };
 
 export default Page;
+
+
+
+
+
