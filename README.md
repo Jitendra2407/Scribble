@@ -21,7 +21,7 @@
 
 ---
 
-## 🌟 Features
+<!-- ## 🌟 Features
 
 - 🎨 **Interactive Drawing Canvas** - Smooth drawing with mouse/touch support
 - 🔄 **Smart Reconnection** - 10-second grace period to rejoin without losing progress
@@ -33,7 +33,22 @@
 - ⚡ **Real-time Communication** - Instant updates via WebSockets
 - 🖌️ **Customizable Drawing Tools** - Choose colors, brush sizes, and more
 - 🗣️ **Voice Input** - Use speech-to-text to chat
-- 💡 Smart Hints – Automatically get helpful hints if you're stuck for too long
+- 💡 Smart Hints – Automatically get helpful hints if you're stuck for too long -->
+
+## 🌟 Features
+
+- 🎨 **Interactive Drawing Canvas** - Smooth drawing with mouse/touch support
+- 📹 **Video Chat** - See and talk to your friends while playing
+- 🗣️ **Voice Input & Feedback** - Use your voice to chat and get game updates
+- 🔄 **Smart Reconnection** - 30-second grace period to rejoin without losing progress
+- ⏱️ **Timed Rounds & Turns** - Fast-paced gameplay with countdown timers
+- 🏆 **Dynamic Scoring System** - Points for quick guesses and successful drawings
+- 👥 **Private Rooms** - Create password-protected lobbies for your friends
+- 🔐 **JWT Authentication** - Secure token-based user sessions
+- 📱 **Responsive Design** - Play on desktop, tablet, or mobile
+- ⚡ **Real-time Communication** - Instant updates via WebSockets
+- 🖌️ **Customizable Drawing Tools** - Choose colors, brush sizes, and clear the canvas
+- 💡 **Smart Hints** – Automatically get helpful hints if you're stuck for too long
 
 ## 🎮 How to Play
 
