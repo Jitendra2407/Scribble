@@ -1,6 +1,10 @@
-import { GAME_CONFIG } from '../config/gameConfig.js';
-import { getRandomWords, generateWordHint, generateSimpleWordHint } from '../utils/gameUtils.js';
-import gameStateManager from './gameStateManager.js';
+import { GAME_CONFIG } from "../config/gameConfig.js";
+import {
+  getRandomWords,
+  generateWordHint,
+  generateSimpleWordHint,
+} from "../utils/gameUtils.js";
+import gameStateManager from "./gameStateManager.js";
 
 class GameLogic {
   constructor(io) {
@@ -11,22 +15,28 @@ class GameLogic {
     const gameRoom = gameStateManager.getGameRoom(roomId);
     if (!gameRoom) return;
 
-    gameRoom.gameState = 'playing';
+    gameRoom.gameState = "playing";
     gameRoom.currentRound = 1;
     gameRoom.currentTurnInRound = 0;
-    
+
     // Use the existing drawing order (userIds) from when players joined
     if (gameRoom.drawingOrder.length === 0) {
       // Fallback: create drawing order from currently connected players
       const connectedPlayers = gameStateManager.getConnectedPlayers(roomId);
-      gameRoom.drawingOrder = connectedPlayers.map(p => p.userId);
+      gameRoom.drawingOrder = connectedPlayers.map((p) => p.userId);
     }
     gameRoom.totalPlayers = gameRoom.drawingOrder.length;
-    
-    console.log(`Game started in room ${roomId}. Drawing order:`, 
-      gameRoom.drawingOrder.map(userId => gameStateManager.getPlayerByUserId(roomId, userId)?.username));
-    console.log(`Total players: ${gameRoom.totalPlayers}, Fixed rounds: ${GAME_CONFIG.TOTAL_ROUNDS}`);
-    
+
+    console.log(
+      `Game started in room ${roomId}. Drawing order:`,
+      gameRoom.drawingOrder.map(
+        (userId) => gameStateManager.getPlayerByUserId(roomId, userId)?.username
+      )
+    );
+    console.log(
+      `Total players: ${gameRoom.totalPlayers}, Fixed rounds: ${GAME_CONFIG.TOTAL_ROUNDS}`
+    );
+
     this.startNewTurn(roomId);
   }
 
@@ -38,24 +48,27 @@ class GameLogic {
     if (gameRoom.currentTurnInRound >= gameRoom.totalPlayers) {
       gameRoom.currentRound++;
       gameRoom.currentTurnInRound = 0;
-      
+
       if (gameRoom.currentRound > GAME_CONFIG.TOTAL_ROUNDS) {
         this.endGame(roomId);
         return;
       }
-      
-      this.io.to(roomId).emit('newRoundStarted', {
+
+      this.io.to(roomId).emit("newRoundStarted", {
         round: gameRoom.currentRound,
         totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
-        message: `Round ${gameRoom.currentRound} begins!`
+        message: `Round ${gameRoom.currentRound} begins!`,
       });
     }
 
     // Get current drawer (by userId)
     const drawerUserId = gameRoom.drawingOrder[gameRoom.currentTurnInRound];
     gameRoom.currentDrawer = drawerUserId; // Store userId, not socketId
-    const currentDrawerState = gameStateManager.getPlayerByUserId(roomId, drawerUserId);
-    
+    const currentDrawerState = gameStateManager.getPlayerByUserId(
+      roomId,
+      drawerUserId
+    );
+
     if (!currentDrawerState) {
       console.error(`Drawer ${drawerUserId} not found in room ${roomId}`);
       // Skip this turn if drawer not found
@@ -64,21 +77,26 @@ class GameLogic {
       return;
     }
 
-    console.log(`Round ${gameRoom.currentRound}, Turn ${gameRoom.currentTurnInRound + 1}/${gameRoom.totalPlayers}: ${currentDrawerState.username} is drawing`);
+    console.log(
+      `Round ${gameRoom.currentRound}, Turn ${
+        gameRoom.currentTurnInRound + 1
+      }/${gameRoom.totalPlayers}: ${currentDrawerState.username} is drawing`
+    );
 
     // Reset for new turn
     gameRoom.guessedPlayers.clear();
     gameStateManager.resetRevealedPositions(roomId);
     gameStateManager.clearDrawHistory(roomId);
+    this.io.to(roomId).emit("canvasClear");
 
     // Generate word choices
-    gameRoom.wordChoices = getRandomWords('medium', 3);
+    gameRoom.wordChoices = getRandomWords("medium", 3);
     gameRoom.currentWord = null;
     gameRoom.isWordSelectionPhase = true;
 
     // Broadcast updated game state
     const currentGameState = {
-      state: 'playing',
+      state: "playing",
       round: gameRoom.currentRound,
       totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
       turnInRound: gameRoom.currentTurnInRound + 1,
@@ -86,33 +104,38 @@ class GameLogic {
       players: gameStateManager.getAllPlayers(roomId),
       scores: Object.fromEntries(gameRoom.scores),
       currentDrawer: currentDrawerState.username,
-      timeLeft: 0
+      timeLeft: 0,
     };
 
-    this.io.to(roomId).emit('gameState', currentGameState);
+    this.io.to(roomId).emit("gameState", currentGameState);
 
     // Notify all players about the new turn
-    this.io.to(roomId).emit('newTurn', {
+    this.io.to(roomId).emit("newTurn", {
       round: gameRoom.currentRound,
       totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
       turnInRound: gameRoom.currentTurnInRound + 1,
       totalTurnsInRound: gameRoom.totalPlayers,
       drawer: currentDrawerState.username,
-      preparationTime: 15
+      preparationTime: 15,
     });
 
     // Send word choices to current drawer (if connected)
-    const drawerSocketId = gameStateManager.getUserSocketId(roomId, drawerUserId);
+    const drawerSocketId = gameStateManager.getUserSocketId(
+      roomId,
+      drawerUserId
+    );
     if (drawerSocketId) {
-      this.io.to(drawerSocketId).emit('wordChoices', {
+      this.io.to(drawerSocketId).emit("wordChoices", {
         words: gameRoom.wordChoices,
         timeLimit: 15,
         round: gameRoom.currentRound,
-        turn: gameRoom.currentTurnInRound + 1
+        turn: gameRoom.currentTurnInRound + 1,
       });
     } else {
       // Drawer is disconnected, auto-select word
-      console.log(`Drawer ${currentDrawerState.username} is disconnected, auto-selecting word`);
+      console.log(
+        `Drawer ${currentDrawerState.username} is disconnected, auto-selecting word`
+      );
       gameRoom.currentWord = gameRoom.wordChoices[0];
       setTimeout(() => this.startDrawingPhase(roomId), 1000);
       return;
@@ -126,35 +149,40 @@ class GameLogic {
     if (!gameRoom) return;
 
     let preparationTime = 15;
-    
+
     // Send initial countdown
-    this.io.to(roomId).emit('preparationCountdown', {
+    this.io.to(roomId).emit("preparationCountdown", {
       countdown: preparationTime,
       drawer: gameRoom.players.get(gameRoom.currentDrawer)?.username,
       round: gameRoom.currentRound,
-      turn: gameRoom.currentTurnInRound + 1
+      turn: gameRoom.currentTurnInRound + 1,
     });
 
     const countdownInterval = setInterval(() => {
       preparationTime--;
-      
-      this.io.to(roomId).emit('preparationCountdown', {
+
+      this.io.to(roomId).emit("preparationCountdown", {
         countdown: preparationTime,
         drawer: gameRoom.players.get(gameRoom.currentDrawer)?.username,
         round: gameRoom.currentRound,
-        turn: gameRoom.currentTurnInRound + 1
+        turn: gameRoom.currentTurnInRound + 1,
       });
-      
+
       if (preparationTime <= 0) {
         clearInterval(countdownInterval);
-        
+
         // Check if word was selected, if not auto-select
         const currentGameRoom = gameStateManager.getGameRoom(roomId);
         if (currentGameRoom && currentGameRoom.isWordSelectionPhase) {
           currentGameRoom.currentWord = currentGameRoom.wordChoices[0];
-          console.log(`Auto-selected word: ${currentGameRoom.currentWord} for ${currentGameRoom.players.get(currentGameRoom.currentDrawer)?.username}`);
+          console.log(
+            `Auto-selected word: ${currentGameRoom.currentWord} for ${
+              currentGameRoom.players.get(currentGameRoom.currentDrawer)
+                ?.username
+            }`
+          );
         }
-        
+
         this.startDrawingPhase(roomId);
       }
     }, 1000);
@@ -170,7 +198,10 @@ class GameLogic {
     }
 
     // Get drawer userId from socketId
-    const drawerPlayer = gameStateManager.getPlayerBySocketId(roomId, drawerSocketId);
+    const drawerPlayer = gameStateManager.getPlayerBySocketId(
+      roomId,
+      drawerSocketId
+    );
     if (!drawerPlayer || gameRoom.currentDrawer !== drawerPlayer.userId) {
       return false;
     }
@@ -187,9 +218,9 @@ class GameLogic {
 
     gameRoom.currentWord = selectedWord;
     gameRoom.isWordSelectionPhase = false;
-    
+
     console.log(`Word selected: ${selectedWord} by ${drawerPlayer.username}`);
-    
+
     this.startDrawingPhase(roomId);
     return true;
   }
@@ -199,36 +230,44 @@ class GameLogic {
     if (!gameRoom) return;
 
     gameRoom.isWordSelectionPhase = false;
-    
+
     gameRoom.roundStartTime = Date.now();
-    gameRoom.roundEndTime = Date.now() + (GAME_CONFIG.TURN_TIME * 1000);
+    gameRoom.roundEndTime = Date.now() + GAME_CONFIG.TURN_TIME * 1000;
 
     const initialHint = generateSimpleWordHint(gameRoom.currentWord);
-    const currentDrawerState = gameStateManager.getPlayerByUserId(roomId, gameRoom.currentDrawer);
-    
-    console.log(`Drawing phase started. Word: ${gameRoom.currentWord}, Drawer: ${currentDrawerState?.username}`);
+    const currentDrawerState = gameStateManager.getPlayerByUserId(
+      roomId,
+      gameRoom.currentDrawer
+    );
+
+    console.log(
+      `Drawing phase started. Word: ${gameRoom.currentWord}, Drawer: ${currentDrawerState?.username}`
+    );
 
     // Notify all players about drawing phase start
-    this.io.to(roomId).emit('drawingPhase', {
+    this.io.to(roomId).emit("drawingPhase", {
       word: initialHint,
       wordLength: gameRoom.currentWord.length,
       timeLeft: GAME_CONFIG.TURN_TIME,
       round: gameRoom.currentRound,
       turn: gameRoom.currentTurnInRound + 1,
-      drawer: currentDrawerState?.username
+      drawer: currentDrawerState?.username,
     });
 
     // Send actual word to drawer (if connected)
-    const drawerSocketId = gameStateManager.getUserSocketId(roomId, gameRoom.currentDrawer);
+    const drawerSocketId = gameStateManager.getUserSocketId(
+      roomId,
+      gameRoom.currentDrawer
+    );
     if (drawerSocketId) {
-      this.io.to(drawerSocketId).emit('drawerWord', {
-        word: gameRoom.currentWord
+      this.io.to(drawerSocketId).emit("drawerWord", {
+        word: gameRoom.currentWord,
       });
     }
 
     // Broadcast updated game state
     const updatedGameState = {
-      state: 'playing',
+      state: "playing",
       round: gameRoom.currentRound,
       totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
       turnInRound: gameRoom.currentTurnInRound + 1,
@@ -236,10 +275,10 @@ class GameLogic {
       players: gameStateManager.getAllPlayers(roomId),
       scores: Object.fromEntries(gameRoom.scores),
       currentDrawer: currentDrawerState?.username,
-      timeLeft: GAME_CONFIG.TURN_TIME * 1000
+      timeLeft: GAME_CONFIG.TURN_TIME * 1000,
     };
 
-    this.io.to(roomId).emit('gameState', updatedGameState);
+    this.io.to(roomId).emit("gameState", updatedGameState);
     this.startTurnTimer(roomId);
   }
 
@@ -254,35 +293,39 @@ class GameLogic {
     gameRoom.turnTimer = setInterval(() => {
       const now = Date.now();
       const timeRemaining = Math.max(0, gameRoom.roundEndTime - now);
-      const timeElapsed = (GAME_CONFIG.TURN_TIME * 1000) - timeRemaining;
-      
-      const currentRevealedPositions = gameStateManager.getRevealedPositions(roomId);
+      const timeElapsed = GAME_CONFIG.TURN_TIME * 1000 - timeRemaining;
+
+      const currentRevealedPositions =
+        gameStateManager.getRevealedPositions(roomId);
       const hintResult = generateWordHint(
-        gameRoom.currentWord, 
-        timeElapsed, 
+        gameRoom.currentWord,
+        timeElapsed,
         GAME_CONFIG.TURN_TIME * 1000,
         currentRevealedPositions
       );
-      
-      gameStateManager.updateRevealedPositions(roomId, hintResult.revealedPositions);
-      
-      this.io.to(roomId).emit('timeUpdate', {
+
+      gameStateManager.updateRevealedPositions(
+        roomId,
+        hintResult.revealedPositions
+      );
+
+      this.io.to(roomId).emit("timeUpdate", {
         timeLeft: timeRemaining,
         roundEndTime: gameRoom.roundEndTime,
         wordHint: hintResult.hint,
         round: gameRoom.currentRound,
-        turn: gameRoom.currentTurnInRound + 1
+        turn: gameRoom.currentTurnInRound + 1,
       });
 
       if (timeRemaining <= 0) {
         clearInterval(gameRoom.turnTimer);
         gameRoom.turnTimer = null;
-        this.endTurn(roomId, 'timeUp');
+        this.endTurn(roomId, "timeUp");
       }
     }, 1000);
   }
 
-  endTurn(roomId, reason = 'completed') {
+  endTurn(roomId, reason = "completed") {
     const gameRoom = gameStateManager.getGameRoom(roomId);
     if (!gameRoom) return;
 
@@ -296,7 +339,10 @@ class GameLogic {
       gameRoom.preparationTimer = null;
     }
 
-    const currentDrawerState = gameStateManager.getPlayerByUserId(roomId, gameRoom.currentDrawer);
+    const currentDrawerState = gameStateManager.getPlayerByUserId(
+      roomId,
+      gameRoom.currentDrawer
+    );
     let drawerPointsAwarded = 0;
 
     // Award or penalize drawer based on game outcome
@@ -304,19 +350,26 @@ class GameLogic {
       // Someone guessed - award points to drawer
       drawerPointsAwarded = GAME_CONFIG.POINTS.DRAWER;
       const drawerScore = gameRoom.scores.get(gameRoom.currentDrawer) || 0;
-      gameRoom.scores.set(gameRoom.currentDrawer, drawerScore + drawerPointsAwarded);
-      
-      console.log(`Drawer ${currentDrawerState?.username} awarded ${drawerPointsAwarded} points (${gameRoom.guessedPlayers.size} players guessed)`);
+      gameRoom.scores.set(
+        gameRoom.currentDrawer,
+        drawerScore + drawerPointsAwarded
+      );
+
+      console.log(
+        `Drawer ${currentDrawerState?.username} awarded ${drawerPointsAwarded} points (${gameRoom.guessedPlayers.size} players guessed)`
+      );
     } else {
       // No one guessed - penalize drawer
       const drawerPenalty = GAME_CONFIG.POINTS.DRAWER_PENALTY || 60; // Default 60 points penalty
       drawerPointsAwarded = -drawerPenalty;
-      
+
       const drawerScore = gameRoom.scores.get(gameRoom.currentDrawer) || 0;
       const newScore = Math.max(0, drawerScore - drawerPenalty); // Don't go below 0
       gameRoom.scores.set(gameRoom.currentDrawer, newScore);
-      
-      console.log(`Drawer ${currentDrawerState?.username} penalized ${drawerPenalty} points (no one guessed). Score: ${drawerScore} -> ${newScore}`);
+
+      console.log(
+        `Drawer ${currentDrawerState?.username} penalized ${drawerPenalty} points (no one guessed). Score: ${drawerScore} -> ${newScore}`
+      );
     }
 
     // Update drawer's playerState score for consistency
@@ -326,10 +379,10 @@ class GameLogic {
     }
 
     // Show final word
-    this.io.to(roomId).emit('timeUpdate', {
+    this.io.to(roomId).emit("timeUpdate", {
       timeLeft: 0,
       roundEndTime: gameRoom.roundEndTime,
-      wordHint: gameRoom.currentWord
+      wordHint: gameRoom.currentWord,
     });
 
     // Prepare turn results with drawer penalty info
@@ -343,39 +396,45 @@ class GameLogic {
       drawer: currentDrawerState?.username,
       drawerPointsAwarded, // Include drawer points/penalty info
       scores: Object.fromEntries(gameRoom.scores),
-      guessedPlayers: Array.from(gameRoom.guessedPlayers).map(socketId => {
-        const player = gameStateManager.getPlayerBySocketId(roomId, socketId);
-        return player?.username;
-      }).filter(Boolean),
-      noOneGuessed: gameRoom.guessedPlayers.size === 0 // Flag for frontend
+      guessedPlayers: Array.from(gameRoom.guessedPlayers)
+        .map((socketId) => {
+          const player = gameStateManager.getPlayerBySocketId(roomId, socketId);
+          return player?.username;
+        })
+        .filter(Boolean),
+      noOneGuessed: gameRoom.guessedPlayers.size === 0, // Flag for frontend
     };
 
-    console.log(`Turn ${gameRoom.currentTurnInRound + 1} of round ${gameRoom.currentRound} ended. Reason: ${reason}`);
+    console.log(
+      `Turn ${gameRoom.currentTurnInRound + 1} of round ${
+        gameRoom.currentRound
+      } ended. Reason: ${reason}`
+    );
 
-    this.io.to(roomId).emit('turnEnd', turnResults);
+    this.io.to(roomId).emit("turnEnd", turnResults);
     this.io.to(roomId).emit("scoreUpdate", {
-      scores: Object.fromEntries(gameRoom.scores)
+      scores: Object.fromEntries(gameRoom.scores),
     });
 
     // Special notification for drawer penalty
     if (gameRoom.guessedPlayers.size === 0) {
-      this.io.to(roomId).emit('drawerPenalty', {
+      this.io.to(roomId).emit("drawerPenalty", {
         drawer: currentDrawerState?.username,
         penalty: GAME_CONFIG.POINTS.DRAWER_PENALTY || 60,
-        message: `${currentDrawerState?.username} lost points - no one guessed the word!`
+        message: `${currentDrawerState?.username} lost points - no one guessed the word!`,
       });
     }
 
     gameRoom.currentTurnInRound++;
-    
+
     if (gameRoom.currentTurnInRound >= gameRoom.totalPlayers) {
-      this.io.to(roomId).emit('roundComplete', {
+      this.io.to(roomId).emit("roundComplete", {
         round: gameRoom.currentRound,
         totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
         scores: Object.fromEntries(gameRoom.scores),
         word: gameRoom.currentWord,
       });
-      
+
       if (gameRoom.currentRound >= GAME_CONFIG.TOTAL_ROUNDS) {
         setTimeout(() => {
           this.endGame(roomId);
@@ -386,7 +445,7 @@ class GameLogic {
 
     setTimeout(() => {
       const currentGameRoom = gameStateManager.getGameRoom(roomId);
-      if (currentGameRoom && currentGameRoom.gameState === 'playing') {
+      if (currentGameRoom && currentGameRoom.gameState === "playing") {
         this.startNewTurn(roomId);
       }
     }, 3000);
@@ -396,33 +455,33 @@ class GameLogic {
     const gameRoom = gameStateManager.getGameRoom(roomId);
     if (!gameRoom) return;
 
-    gameRoom.gameState = 'ended';
+    gameRoom.gameState = "ended";
 
     // Calculate final rankings using userId -> score mapping
     const rankings = Array.from(gameRoom.scores.entries())
       .map(([userId, score]) => {
         const playerState = gameStateManager.getPlayerByUserId(roomId, userId);
         return {
-          username: playerState?.username || 'Unknown',
-          score
+          username: playerState?.username || "Unknown",
+          score,
         };
       })
       .sort((a, b) => b.score - a.score);
 
     console.log(`Game ended in room ${roomId}. Final rankings:`, rankings);
 
-    this.io.to(roomId).emit('gameEnd', {
+    this.io.to(roomId).emit("gameEnd", {
       rankings,
       totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
       totalTurns: gameRoom.totalPlayers * GAME_CONFIG.TOTAL_ROUNDS,
-      message: "Game completed! Thanks for playing!"
+      message: "Game completed! Thanks for playing!",
     });
 
     // Reset game state after 10 seconds
     setTimeout(() => {
       const currentGameRoom = gameStateManager.getGameRoom(roomId);
       if (currentGameRoom) {
-        currentGameRoom.gameState = 'waiting';
+        currentGameRoom.gameState = "waiting";
         currentGameRoom.currentRound = 0;
         currentGameRoom.currentTurnInRound = 0;
         currentGameRoom.scores.clear();
@@ -431,20 +490,20 @@ class GameLogic {
         currentGameRoom.drawingOrder = [];
         currentGameRoom.isWordSelectionPhase = false;
         gameStateManager.resetRevealedPositions(roomId);
-        
+
         // Reset all players to not ready
         for (const [userId, playerState] of currentGameRoom.playerStates) {
           playerState.isReady = false;
         }
-        
+
         this.io.to(roomId).emit("gameReset", {
-          message: "Game has been reset. Get ready for a new game!"
+          message: "Game has been reset. Get ready for a new game!",
         });
-        
+
         this.io.to(roomId).emit("playerUpdate", {
           players: gameStateManager.getAllPlayers(roomId),
           playerCount: gameStateManager.getPlayerCount(roomId),
-          canStart: false
+          canStart: false,
         });
       }
     }, 10000);
@@ -456,35 +515,38 @@ class GameLogic {
 
     console.log(`Ending game in room ${roomId} due to insufficient players`);
 
-    gameRoom.gameState = 'ended';
+    gameRoom.gameState = "ended";
 
     // Calculate current rankings using userId -> score mapping
     const rankings = Array.from(gameRoom.scores.entries())
       .map(([userId, score]) => {
         const playerState = gameStateManager.getPlayerByUserId(roomId, userId);
         return {
-          username: playerState?.username || 'Unknown',
+          username: playerState?.username || "Unknown",
           score,
-          isConnected: playerState?.isConnected || false
+          isConnected: playerState?.isConnected || false,
         };
       })
       .sort((a, b) => b.score - a.score);
 
-    console.log(`Game ended in room ${roomId} due to insufficient players. Current rankings:`, rankings);
+    console.log(
+      `Game ended in room ${roomId} due to insufficient players. Current rankings:`,
+      rankings
+    );
 
-    this.io.to(roomId).emit('gameEnd', {
+    this.io.to(roomId).emit("gameEnd", {
       rankings,
       totalRounds: GAME_CONFIG.TOTAL_ROUNDS,
-      reason: 'insufficient_players',
+      reason: "insufficient_players",
       message: "Game ended - not enough players remaining!",
-      currentRound: gameRoom.currentRound
+      currentRound: gameRoom.currentRound,
     });
 
     // Reset game state after 5 seconds (shorter since game ended early)
     setTimeout(() => {
       const currentGameRoom = gameStateManager.getGameRoom(roomId);
       if (currentGameRoom) {
-        currentGameRoom.gameState = 'waiting';
+        currentGameRoom.gameState = "waiting";
         currentGameRoom.currentRound = 0;
         currentGameRoom.currentTurnInRound = 0;
         currentGameRoom.scores.clear();
@@ -493,20 +555,20 @@ class GameLogic {
         currentGameRoom.drawingOrder = [];
         currentGameRoom.isWordSelectionPhase = false;
         gameStateManager.resetRevealedPositions(roomId);
-        
+
         // Reset all players to not ready
         for (const [userId, playerState] of currentGameRoom.playerStates) {
           playerState.isReady = false;
         }
-        
+
         this.io.to(roomId).emit("gameReset", {
-          message: "Game has been reset. Waiting for more players to join!"
+          message: "Game has been reset. Waiting for more players to join!",
         });
-        
+
         this.io.to(roomId).emit("playerUpdate", {
           players: gameStateManager.getAllPlayers(roomId),
           playerCount: gameStateManager.getPlayerCount(roomId),
-          canStart: false
+          canStart: false,
         });
       }
     }, 5000);
@@ -517,10 +579,10 @@ class GameLogic {
     if (!gameRoom) return false;
 
     const connectedPlayers = gameStateManager.getConnectedPlayers(roomId);
-    const allReady = connectedPlayers.every(p => p.isReady);
+    const allReady = connectedPlayers.every((p) => p.isReady);
     const enoughPlayers = connectedPlayers.length >= GAME_CONFIG.MIN_PLAYERS;
-    
-    return allReady && enoughPlayers && gameRoom.gameState === 'waiting';
+
+    return allReady && enoughPlayers && gameRoom.gameState === "waiting";
   }
 }
 
