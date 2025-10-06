@@ -481,6 +481,7 @@ class GameLogic {
     setTimeout(() => {
       const currentGameRoom = gameStateManager.getGameRoom(roomId);
       if (currentGameRoom) {
+        this.io.to(roomId).emit("canvasClear");
         currentGameRoom.gameState = "waiting";
         currentGameRoom.currentRound = 0;
         currentGameRoom.currentTurnInRound = 0;
@@ -546,6 +547,7 @@ class GameLogic {
     setTimeout(() => {
       const currentGameRoom = gameStateManager.getGameRoom(roomId);
       if (currentGameRoom) {
+        this.io.to(roomId).emit("canvasClear");
         currentGameRoom.gameState = "waiting";
         currentGameRoom.currentRound = 0;
         currentGameRoom.currentTurnInRound = 0;
